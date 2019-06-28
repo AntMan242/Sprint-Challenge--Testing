@@ -2,66 +2,70 @@ const request = require('supertest');
 
 const server = require('./server.js');
 
-describe('server', () => {
-    describe('GET', () => {
+describe('server.js', () => {
+    // describe('GET /', () => {
 
-        it('should return status code 200', async () => {
-            const res = await request(server).get('/');
+    //     it('should return status code 200', async () => {
+    //         const res = await request(server).get('/');
 
-            expect(res.status).toBe(200);
-        });
+    //         expect(res.status).toBe(200);
+    //     });
 
-        it('should return JSON', async () => {
-            const res = await request(server).get('/');
-            expect(res.type).toBe('application/json');
-        });
+    //     it('should return JSON', async () => {
+    //         const res = await request(server).get('/');
+    //         expect(res.type).toBe('application/json');
+    //     });
 
-        it('should return {message: "heeeey yaaaall"}', async () => {
-            const res = await request(server).get('/');
-            expect(res.body).toEqual({ message: 'heeeey yaaaall'});
-        })
-    })
+    //     it('should return "heeeey yaaaall"', async () => {
+    //         const res = await request(server).get('/');
+    //         expect(res.body).toEqual({ message: 'heeeey yaaaall'});
+    //     })
+    // })
 
     describe('GET/games', () => {
-        it('returns the array of games', async () => {
-            const res = await request(server).get('/games');
-            expect(res.type).toBe('application/json');
+        it('should return status code 200', () => {;
+            return request(server).get('/games')
+            .expect(200)
         })
 
-        it('returns status code 200', async () => {
-            const res = await request(server).get('/games');
-            expect(res.status).toBe(200);
+        it('returns something',  () => {
+            return request(server).get('/games')
+            .then(response => {
+                expect(Array.isArray(response.body)).toBe(true)
+            })
+            
         })
 
-        it('returns an array', async () => {
-            const res = await request(server).get('/games');
-            expect(Array.isArray(res.body)).toBe(true);
+        it('returns with status code 200 OK', async () => {
+            request(server)
+            .get('/')
+            .expect('Content-Type', /json/i);
         });
     });
 
     describe('POST/games', () => {
-        it('returns status code 422 if fields are empty', async () => {
-            const res = await request(server)
+        it('should receive status code 201 if complete', () => {
+            const game = { title: 'Tecmo Bowl', genre: 'Sports'};
+            return request(server)
             .post('/games')
-            .send({ title: 'RBI Baseball', releaseYear: 1987});
-
-            expect(res.status).toBe(422);
+            .send(game)
+            .expect(201)
         });
 
-        it('returns status code 201', async () => {
-            const res = await request(server)
+        it('returns a 422 status code when genre is missing',  () => {
+            const game = { title: 'Tecmo Bowl'};
+            return request(server)
             .post('/games')
-            .send({ title: 'Super Mario Kart', genre: 'Racing'})
-
-            expect(res.body).toBe(201);
+            .send(game)
+            .expect(422)
         });
 
-        it('returns message that game was added', async () => {
-            const res = await request(server)
+        it('returns a 422 status code if title is missing', () => {
+            const game = { genre: 'Sports'};
+            return request(server)
             .post('/games')
-            .send({ title: 'Bases Loaded', genre: 'Sports', releaseYear: 1988 })
-
-            expect(res.body).toEqual({ message: 'Game has been added' })
+            .send(game)
+            .expect(422)
         })
     })
 })
